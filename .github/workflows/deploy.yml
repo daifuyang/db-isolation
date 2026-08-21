@@ -1,0 +1,51 @@
+name: deploy
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # manual trigger
+
+env:
+  ECS_HOST: 139.196.89.64
+  ECS_PORT: 22
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - name: Build linux/amd64
+        run: |
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 \
+            go build -trimpath -ldflags='-s -w' \
+            -o bin/db-isolation.linux-amd64 ./cmd/server
+          SHA=$(sha256sum bin/db-isolation.linux-amd64 | awk '{print $1}')
+          echo "binary_sha=$SHA" >> "$GITHUB_ENV"
+
+      - name: Upload binary to ECS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ env.ECS_HOST }}
+          username: ci-deployer
+          port: ${{ env.ECS_PORT }}
+          key: ${{ secrets.CI_DEPLOYER_KEY }}
+          source: "bin/db-isolation.linux-amd64"
+          target: "/tmp"
+          overwrite: true
+
+      - name: Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.ECS_HOST }}
+          username: ci-deployer
+          port: ${{ env.ECS_PORT }}
+          key: ${{ secrets.CI_DEPLOYER_KEY }}
+          script: |
+            /usr/local/bin/ci-deploy.sh \
+              main \
+              /tmp/bin/db-isolation.linux-amd64 \
+              ${{ env.binary_sha }}
