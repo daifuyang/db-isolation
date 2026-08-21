@@ -1,0 +1,12 @@
+# 日志和临时文件
+logs/*
+!logs/.gitkeep
+
+# 本地配置覆盖
+config/*.local.yaml
+
+# 密码、密钥等敏感信息
+*.pem
+*.key
+.env
+.env.*
