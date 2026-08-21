@@ -33,6 +33,7 @@ jobs:
           username: ci-deployer
           port: ${{ env.ECS_PORT }}
           key: ${{ secrets.CI_DEPLOYER_KEY }}
+          passphrase: ${{ secrets.CI_DEPLOYER_PASSPHRASE }}
           source: "bin/db-isolation.linux-amd64"
           target: "/tmp"
           overwrite: true
@@ -44,6 +45,7 @@ jobs:
           username: ci-deployer
           port: ${{ env.ECS_PORT }}
           key: ${{ secrets.CI_DEPLOYER_KEY }}
+          passphrase: ${{ secrets.CI_DEPLOYER_PASSPHRASE }}
           script: |
             /usr/local/bin/ci-deploy.sh \
               main \
