@@ -1,0 +1,34 @@
+{
+  "apps": [
+    {
+      "name": "db-isolation",
+      "script": "/bin/bash",
+      "args": "-lc \"exec /usr/local/bin/db-isolation server --config /etc/db-isolation/config.yaml\"",
+      "exec_mode": "fork",
+      "instances": 1,
+      "uid": "db-isolation",
+      "gid": "db-isolation",
+      "cwd": "/var/lib/db-isolation",
+      "autorestart": true,
+      "max_restarts": 10,
+      "restart_delay": 5000,
+      "kill_timeout": 10000,
+      "kill_signal": "SIGTERM",
+      "min_uptime": "10s",
+      "max_memory_restart": "256M",
+      "out_file": "/var/log/db-isolation/pm2.out.log",
+      "error_file": "/var/log/db-isolation/pm2.error.log",
+      "merge_logs": true,
+      "log_date_format": "YYYY-MM-DDTHH:mm:ss.SSSZ",
+      "log_file": "/var/log/db-isolation/pm2.combined.log",
+      "env": {
+        "NODE_ENV": "production",
+        "DB_ISOLATION_LOG_LEVEL": "info"
+      },
+      "production": {
+        "NODE_ENV": "production",
+        "DB_ISOLATION_LOG_LEVEL": "info"
+      }
+    }
+  ]
+}

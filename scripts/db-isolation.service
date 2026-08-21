@@ -1,0 +1,48 @@
+[Unit]
+Description=db-isolation MySQL provision gateway
+Documentation=https://example.com/db-isolation
+After=network.target local-fs.target
+# Wait until MySQL is accepting connections on localhost. The provisioner
+# pings MySQL at startup, but we still wait so failures surface clearly in
+# journalctl.
+After=mysql.service
+Wants=mysql.service
+
+[Service]
+Type=simple
+User=db-isolation
+Group=db-isolation
+WorkingDirectory=/var/lib/db-isolation
+EnvironmentFile=-/etc/db-isolation/db-isolation.env
+ExecStart=/usr/local/bin/db-isolation server --config /etc/db-isolation/config.yaml
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65536
+
+# Hardening — every option below is intentional.
+#
+# Protect the secret directory and the SQLite file from accidental
+# over-broad sharing.
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/db-isolation /var/log/db-isolation /etc/db-isolation
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+
+# Drop every capability; db-isolation talks to MySQL over TCP, not a Unix
+# socket that requires extra perms. If you need a Unix socket, bind MySQL's
+# socket under /var/run/mysqld and grant the service group read access.
+CapabilityBoundingSet=
+AmbientCapabilities=
+NoNewPrivileges=true
+
+# Allow only the user/group we run as to own the data. The /etc/db-isolation
+# directory is created with mode 0750 by the packaging step; secret files
+# inside it carry mode 0600.
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

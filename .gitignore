@@ -1,12 +1,45 @@
-# 日志和临时文件
-logs/*
-!logs/.gitkeep
+# Build artifacts
+bin/
 
-# 本地配置覆盖
+# Go test caches
+*.test
+*.out
+
+# Local config overrides
 config/*.local.yaml
+*.local.yaml
 
-# 密码、密钥等敏感信息
+# Secrets — never commit
 *.pem
 *.key
 .env
 .env.*
+
+# Logs
+logs/*.log
+logs/*.txt
+!logs/.gitkeep
+
+# Runtime directories (used by tests / smoke runs)
+/var/lib/db-isolation/
+/etc/db-isolation/
+
+# Editor scratch
+*.swp
+.DS_Store
+
+# DSH / OpenCode / session metadata — never commit
+.dsh-meow/
+.opencode/
+docs/plan-*.md
+docs/old-plan.md
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# Vendored / cache
+vendor/
+.gocache/
+.gomod/

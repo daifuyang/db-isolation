@@ -1,0 +1,35 @@
+# db-isolation server configuration. Sensitive values (MySQL root password)
+# MUST NOT appear here — they live in /root/.my.cnf or in the
+# MYSQL_ADMIN_DSN environment variable.
+
+server:
+  # Bind address. Keep on localhost unless you have an authenticated
+  # reverse proxy (nginx) in front of this service.
+  addr: 127.0.0.1:8787
+  shutdown_timeout_seconds: 10
+
+storage:
+  # Path to the SQLite database that stores projects, tokens, and audit
+  # log. The directory must be writable by the user the service runs as.
+  path: /var/lib/db-isolation/db-isolation.db
+
+mysql:
+  # Operator-controlled path to the admin my.cnf. The server reads
+  # user/password/host from this file. NEVER bake these into config.yaml.
+  admin_config_path: /root/.my.cnf
+  # If your ORM/migrations require DROP TABLE, set this to true. Off by
+  # default to keep privilege grants minimal.
+  allow_drop: false
+
+secrets:
+  # Directory for per-project DATABASE_URL env files. Permissions are
+  # enforced at write time (0600 per file, 0750 directory).
+  dir: /etc/db-isolation/apps
+
+audit:
+  # Mirror every audit entry to a JSON-lines file for compliance.
+  to_file: true
+  file: /var/log/db-isolation/audit.log
+
+logging:
+  level: info   # debug | info | warn | error
